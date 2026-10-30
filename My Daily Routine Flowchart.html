@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Daily Routine Flowchart & Schedule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f8fafc;--dot:#cbd5e1;--tx:#0f172a;--mut:#64748b;--ln:#94a3b8;--card:#ffffff;
+  --card-rgb:255,255,255;
+  --a:#e0e7ff;--ab:#6366f1;--b:#e0f2fe;--bb:#0284c7;--c:#dcfce7;--cb:#16a34a;
+  --d:#ffedd5;--db:#ea580c;--s:#fef9c3;--sb:#ca8a04;--f:#fce7f3;--fb:#db2777;--pr:#ef4444;
+  --glow:rgba(99,102,241,0.35);--shadow:0 4px 16px -2px rgba(15,23,42,0.08);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0f19;--dot:#1e293b;--tx:#f1f5f9;--mut:#94a3b8;--ln:#475569;--card:#131c2e;
+    --card-rgb:19,28,46;
+    --a:#1e1b4b;--ab:#818cf8;--b:#082f49;--bb:#38bdf8;--c:#052e16;--cb:#4ade80;
+    --d:#431407;--db:#fb923c;--s:#422006;--sb:#facc15;--f:#500724;--fb:#f472b6;--pr:#f87171;
+    --glow:rgba(129,140,248,0.45);--shadow:0 6px 20px -2px rgba(0,0,0,0.45)
+  }
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif}
+body{background:var(--bg);color:var(--tx);overflow:hidden;position:relative}
+
+/* Top Navigation Bar */
+.top-nav{
+  position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);
+  display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;z-index:20;
+}
+.top-row{
+  display:flex;gap:10px;align-items:center;justify-content:space-between;
+}
+.pill{
+  pointer-events:auto;background:rgba(var(--card-rgb),0.88);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--dot);border-radius:14px;padding:8px 14px;
+  box-shadow:var(--shadow);transition:all .2s ease;
+}
+.brand{display:flex;flex-direction:column;gap:3px}
+.brand-title{display:flex;align-items:center;gap:8px}
+.brand-title h1{margin:0;font-size:16px;font-weight:700;letter-spacing:-0.3px}
+.day-pill{
+  font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;
+  background:var(--a);color:var(--ab);border:1px solid var(--ab);
+}
+.brand-sub{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.brand-sub .sep{opacity:0.4}
+.brand-sub #pg{font-weight:600;color:var(--tx)}
+
+.controls-group{display:flex;gap:8px;align-items:center}
+.view-switcher{display:flex;gap:4px;padding:4px}
+.view-btn{
+  border:0;background:transparent;color:var(--mut);font-family:inherit;
+  font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:8px;cursor:pointer;
+  transition:all .15s ease;display:flex;align-items:center;gap:5px;
+}
+.view-btn:hover{color:var(--tx);background:var(--dot)}
+.view-btn.active{
+  background:var(--ab);color:#fff;box-shadow:0 2px 8px var(--glow);
+}
+
+.zoom{display:flex;gap:3px;padding:4px}
+.zoom button{
+  border:0;background:transparent;color:var(--tx);font-size:17px;font-weight:600;
+  width:32px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s ease;
+}
+.zoom button:hover{background:var(--dot)}
+
+/* Day Tabs Row */
+.tabs-pill{
+  padding:4px 6px;width:fit-content;max-width:100%;
+}
+.tabs-wrap{
+  display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.tabs-wrap::-webkit-scrollbar{display:none}
+.tab-btn{
+  border:1px solid transparent;background:transparent;color:var(--mut);font-family:inherit;
+  font-size:12px;font-weight:600;padding:6px 11px;border-radius:10px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:all .15s ease;
+  user-select:none;
+}
+.tab-btn:hover{color:var(--tx);background:var(--dot)}
+.tab-btn.active{
+  background:var(--tx);color:var(--bg);box-shadow:0 2px 8px rgba(0,0,0,0.18);
+}
+.tab-btn .t-dot{
+  width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block;
+}
+.tab-btn.active .t-dot{background:#4ade80}
+.tab-btn .tab-sub{font-size:10px;opacity:0.8}
+
+/* Interactive Flowchart Canvas */
+#view{
+  position:fixed;inset:0;
+  background-image:radial-gradient(var(--dot) 1.25px,transparent 1.25px);
+  background-size:24px 24px;cursor:grab;touch-action:none;
+}
+#view.drag{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0;width:760px;height:1540px}
+svg{position:absolute;left:0;top:0;width:760px;height:1540px;overflow:visible;pointer-events:none}
+path{
+  fill:none;stroke:var(--ln);stroke-width:2;transition:stroke .2s ease, opacity .2s ease, stroke-width .2s ease;
+}
+path.edge-active{
+  stroke:var(--ab);stroke-width:3.5px;opacity:1;filter:drop-shadow(0 0 5px var(--glow));
+}
+path.edge-dimmed{
+  stroke:var(--dot);stroke-width:1.5px;opacity:0.12;
+}
+
+.n{
+  position:absolute;width:200px;height:62px;border-radius:14px;border:2px solid;
+  display:flex;flex-direction:column;justify-content:center;padding:6px 12px;
+  cursor:pointer;user-select:none;box-shadow:0 3px 10px rgba(0,0,0,0.06);
+  transition:transform .15s ease, opacity .2s ease, filter .2s ease, box-shadow .15s ease;
+}
+.n:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,0.1)}
+.n b{font-size:13.5px;font-weight:700}
+.n span{font-size:11px;color:var(--mut);margin-top:2px}
+.n i{
+  position:absolute;right:-6px;top:-8px;background:var(--pr);color:#fff;
+  font-style:normal;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:99px;
+  letter-spacing:0.2px;box-shadow:0 2px 6px rgba(239,68,68,0.4);
+}
+.n.done{opacity:.55}
+.n.done b{text-decoration:line-through}
+.n.done::after{
+  content:"✓";position:absolute;right:10px;bottom:6px;color:var(--cb);font-weight:800;font-size:14px;
+}
+.n.trk{height:50px;border-width:3px;align-items:center;text-align:center}
+.n.trk b{font-size:14.5px}
+
+.n.node-focus{
+  box-shadow:0 0 0 3px var(--ab), 0 8px 18px var(--glow);
+}
+.n.dimmed{
+  opacity:0.14;filter:grayscale(85%);transform:scale(0.97);
+}
+.n.dimmed:hover{opacity:0.4;filter:grayscale(30%)}
+
+.t0{background:var(--s);border-color:var(--sb)}
+.ta{background:var(--a);border-color:var(--ab)}.tb{background:var(--b);border-color:var(--bb)}
+.tc{background:var(--c);border-color:var(--cb)}.td{background:var(--d);border-color:var(--db)}
+.tf{background:var(--f);border-color:var(--fb)}
+
+/* Schedule Timeline List View */
+#listView{
+  position:fixed;inset:0;padding:120px 16px 40px;overflow-y:auto;
+  display:none;justify-content:center;align-items:flex-start;z-index:10;
+  background:radial-gradient(ellipse at top, rgba(var(--card-rgb),0.5), transparent 70%);
+}
+.list-card{
+  width:100%;max-width:620px;background:rgba(var(--card-rgb),0.92);
+  border:1px solid var(--dot);border-radius:20px;box-shadow:var(--shadow);
+  padding:20px 24px;margin-bottom:30px;backdrop-filter:blur(16px);
+}
+.list-header{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  border-bottom:1px solid var(--dot);padding-bottom:16px;margin-bottom:18px;gap:12px;
+}
+.list-header h2{margin:0 0 4px;font-size:19px;font-weight:800;letter-spacing:-0.4px}
+.list-header p{margin:0;font-size:12.5px;color:var(--mut)}
+.lh-stat{text-align:right;min-width:140px}
+.lh-stat span{font-size:12px;font-weight:700;color:var(--tx)}
+.progress-bar-bg{
+  width:100%;height:7px;background:var(--dot);border-radius:99px;margin-top:6px;overflow:hidden;
+}
+.progress-bar-fill{
+  height:100%;background:linear-gradient(90deg, var(--ab), #10b981);border-radius:99px;
+  transition:width .3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.timeline{display:flex;flex-direction:column;gap:10px}
+.tl-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;border-radius:14px;border:1.5px solid var(--dot);
+  background:var(--card);cursor:pointer;transition:all .15s ease;
+  user-select:none;gap:12px;
+}
+.tl-item:hover{
+  transform:translateY(-1px);border-color:var(--ab);box-shadow:0 4px 12px rgba(0,0,0,0.06);
+}
+.tl-left{display:flex;flex-direction:column;gap:3px;flex:1}
+.tl-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tl-title{font-size:14px;font-weight:700}
+.tl-badge{
+  font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:6px;
+  background:var(--a);color:var(--ab);
+}
+.tl-badge.p1{background:var(--pr);color:#fff}
+.tl-sub{font-size:12px;color:var(--mut)}
+.tl-check{
+  width:24px;height:24px;border-radius:50%;border:2px solid var(--dot);
+  display:flex;align-items:center;justify-content:center;color:transparent;
+  font-size:13px;font-weight:800;transition:all .18s ease;flex-shrink:0;
+}
+.tl-item.done{opacity:0.6;background:transparent}
+.tl-item.done .tl-title{text-decoration:line-through}
+.tl-item.done .tl-check{
+  background:var(--cb);border-color:var(--cb);color:#fff;
+}
+
+/* Legend Pill */
+.leg{
+  position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);
+  z-index:2;font-size:12px;color:var(--mut);pointer-events:none;
+}
+
+@media(max-width:700px){
+  .top-row{flex-direction:column;align-items:stretch;gap:8px}
+  .controls-group{justify-content:space-between}
+  .tabs-pill{width:100%}
+  #listView{padding-top:170px}
+  .leg{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="top-nav">
+  <div class="top-row">
+    <div class="pill brand">
+      <div class="brand-title">
+        <h1>My Daily Routine</h1>
+        <span id="dayBadge" class="day-pill">All Tracks</span>
+      </div>
+      <div class="brand-sub">
+        <span id="dayDesc">Complete Routine Flowchart</span>
+        <span class="sep">•</span>
+        <span id="pg">0 of 0 done</span>
+      </div>
+    </div>
+    
+    <div class="controls-group">
+      <div class="pill view-switcher">
+        <button id="viewFlow" class="view-btn active" title="Flowchart View">🔀 Map</button>
+        <button id="viewList" class="view-btn" title="Daily Schedule View">📋 Schedule</button>
+      </div>
+      <div class="pill zoom">
+        <button id="zo" aria-label="Zoom out">−</button>
+        <button id="fit" aria-label="Fit" title="Fit">⤢</button>
+        <button id="zi" aria-label="Zoom in">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pill tabs-pill">
+    <div class="tabs-wrap" id="tabsWrap" role="tablist">
+      <!-- Tabs generated dynamically -->
+    </div>
+  </div>
+</header>
+
+<div id="view"><div id="world"><svg id="svg"></svg></div></div>
+
+<main id="listView">
+  <div class="list-card">
+    <div class="list-header">
+      <div class="lh-info">
+        <h2 id="listTitle">Daily Schedule</h2>
+        <p id="listSubtitle">Schedule list</p>
+      </div>
+      <div class="lh-stat">
+        <span id="listProgressText">0 of 0 done</span>
+        <div class="progress-bar-bg"><div id="listProgressBar" class="progress-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div id="listItems" class="timeline"></div>
+  </div>
+</main>
+
+<div class="leg pill">Drag to pan · zoom with +/− · tap any box to mark done · resets daily</div>
+
+<script>
+var N=[
+{id:"w",t:"⏰ Wake up",sub:"6:30–7:00 AM",x:280,y:20,c:"t0",cat:"Morning"},
+{id:"g",t:"💪 Gym day",sub:"7:00–8:00 AM · workout",x:155,y:130,c:"ta",cat:"Fitness"},
+{id:"ng",t:"🧠 Non-gym day",sub:"7:00–8:30 AM · DSA Session 1",x:405,y:130,c:"ta",cat:"Study"},
+{id:"bf",t:"🍳 Breakfast",sub:"8:30–9:00 AM · every day",x:280,y:240,c:"tc",cat:"Routine"},
+{id:"d2",t:"🧠 DSA Session 2",sub:"9:00–11:00 AM",x:280,y:350,c:"ta",cat:"Study"},
+{id:"O",t:"🏢 Office day",x:30,y:470,c:"td",trk:1,cat:"Track"},
+{id:"W",t:"🏠 Work from home",x:280,y:470,c:"td",trk:1,cat:"Track"},
+{id:"H",t:"🎉 Holiday",x:530,y:470,c:"tf",trk:1,cat:"Track"},
+{id:"o1",t:"👥 Scrum + office work",sub:"11:00 AM–12:30 PM",x:30,y:570,c:"td",cat:"Office"},
+{id:"o2",t:"👔 Get ready for office",sub:"12:30–1:30 PM",x:30,y:655,c:"tb",cat:"Prep"},
+{id:"o3",t:"🚌 Bus & reach office",sub:"1:30–2:30 PM",x:30,y:740,c:"tb",cat:"Commute"},
+{id:"o4",t:"🎯 Office work",sub:"2:30–7:30 PM",x:30,y:825,c:"td",p:1,cat:"Office"},
+{id:"o5",t:"🚌 Bus back to room",sub:"7:30–8:30 PM",x:30,y:910,c:"tb",cat:"Commute"},
+{id:"o6",t:"🚿 Relax / freshen up",sub:"8:30–8:45 PM",x:30,y:995,c:"tb",cat:"Routine"},
+{id:"w1",t:"👥 Scrum call",sub:"11:00 AM–12:30 PM",x:280,y:570,c:"td",cat:"WFH"},
+{id:"w2",t:"🎯 Office work",sub:"12:30–8:00 PM · study if workload allows",x:280,y:655,c:"td",p:1,cat:"WFH"},
+{id:"h1",t:"🏗️ System Design",sub:"11:00 AM–12:30 PM",x:530,y:570,c:"tf",cat:"Study"},
+{id:"h2",t:"🍛 Lunch",sub:"12:30–1:30 PM",x:530,y:655,c:"tc",cat:"Meal"},
+{id:"h3",t:"🎬 Break",sub:"1:30–6:00 PM · movie / calls / chat",x:530,y:740,c:"tf",cat:"Leisure"},
+{id:"h4",t:"🏗️ System Design",sub:"6:00–8:15 PM",x:530,y:825,c:"tf",cat:"Study"},
+{id:"dn",t:"🍽️ Dinner",sub:"8:30–9:15 PM (office day 8:45)",x:280,y:1130,c:"tc",cat:"Meal"},
+{id:"dv",t:"💻 Development / study",sub:"9:15–10:30 PM",x:280,y:1235,c:"ta",cat:"Study"},
+{id:"wd",t:"🧘 Wind down",sub:"10:30–11:00 PM",x:280,y:1340,c:"t0",cat:"Night"},
+{id:"bd",t:"🛏️ Bedtime",sub:"11:00 PM",x:280,y:1445,c:"t0",cat:"Night"}
+];
+
+var E=[
+  ["w","g"],["w","ng"],["g","bf"],["ng","bf"],["bf","d2"],["d2","O"],["d2","W"],["d2","H"],
+  ["O","o1"],["o1","o2"],["o2","o3"],["o3","o4"],["o4","o5"],["o5","o6"],["o6","dn"],
+  ["W","w1"],["w1","w2"],["w2","dn"],
+  ["H","h1"],["h1","h2"],["h2","h3"],["h3","h4"],["h4","dn"],
+  ["dn","dv"],["dv","wd"],["wd","bd"]
+];
+
+var DAY_CONFIG = {
+  all: {
+    id:"all", label:"All Flow", name:"Full Overview",
+    desc:"Complete flowchart with all paths & tracks",
+    icon:"🗺️", badge:"All Tracks",
+    nodes:null, edges:null
+  },
+  mon: {
+    id:"mon", dayNum:1, label:"Mon", name:"Monday",
+    desc:"🧠 Non-gym day · 🏢 Office day",
+    icon:"🏢", badge:"Office · Non-Gym",
+    nodes:["w","ng","bf","d2","O","o1","o2","o3","o4","o5","o6","dn","dv","wd","bd"],
+    edges:[["w","ng"],["ng","bf"],["bf","d2"],["d2","O"],["O","o1"],["o1","o2"],["o2","o3"],["o3","o4"],["o4","o5"],["o5","o6"],["o6","dn"],["dn","dv"],["dv","wd"],["wd","bd"]]
+  },
+  tue: {
+    id:"tue", dayNum:2, label:"Tue", name:"Tuesday",
+    desc:"💪 Gym day · 🏠 Work from home",
+    icon:"🏠", badge:"WFH · Gym",
+    nodes:["w","g","bf","d2","W","w1","w2","dn","dv","wd","bd"],
+    edges:[["w","g"],["g","bf"],["bf","d2"],["d2","W"],["W","w1"],["w1","w2"],["w2","dn"],["dn","dv"],["dv","wd"],["wd","bd"]]
+  },
+  wed: {
+    id:"wed", dayNum:3, label:"Wed", name:"Wednesday",
+    desc:"🧠 Non-gym day · 🏢 Office day",
+    icon:"🏢", badge:"Office · Non-Gym",
+    nodes:["w","ng","bf","d2","O","o1","o2","o3","o4","o5","o6","dn","dv","wd","bd"],
+    edges:[["w","ng"],["ng","bf"],["bf","d2"],["d2","O"],["O","o1"],["o1","o2"],["o2","o3"],["o3","o4"],["o4","o5"],["o5","o6"],["o6","dn"],["dn","dv"],["dv","wd"],["wd","bd"]]
+  },
+  thu: {
+    id:"thu", dayNum:4, label:"Thu", name:"Thursday",
+    desc:"💪 Gym day · 🏠 Work from home",
+    icon:"🏠", badge:"WFH · Gym",
+    nodes:["w","g","bf","d2","W","w1","w2","dn","dv","wd","bd"],
+    edges:[["w","g"],["g","bf"],["bf","d2"],["d2","W"],["W","w1"],["w1","w2"],["w2","dn"],["dn","dv"],["dv","wd"],["wd","bd"]]
+  },
+  fri: {
+    id:"fri", dayNum:5, label:"Fri", name:"Friday",
+    desc:"🧠 Non-gym day · 🏢 Office day",
+    icon:"🏢", badge:"Office · Non-Gym",
+    nodes:["w","ng","bf","d2","O","o1","o2","o3","o4","o5","o6","dn","dv","wd","bd"],
+    edges:[["w","ng"],["ng","bf"],["bf","d2"],["d2","O"],["O","o1"],["o1","o2"],["o2","o3"],["o3","o4"],["o4","o5"],["o5","o6"],["o6","dn"],["dn","dv"],["dv","wd"],["wd","bd"]]
+  },
+  sat: {
+    id:"sat", dayNum:6, label:"Sat", name:"Saturday",
+    desc:"💪 Gym day · 🎉 Holiday",
+    icon:"🎉", badge:"Holiday · Gym",
+    nodes:["w","g","bf","d2","H","h1","h2","h3","h4","dn","dv","wd","bd"],
+    edges:[["w","g"],["g","bf"],["bf","d2"],["d2","H"],["H","h1"],["h1","h2"],["h2","h3"],["h3","h4"],["h4","dn"],["dn","dv"],["dv","wd"],["wd","bd"]]
+  },
+  sun: {
+    id:"sun", dayNum:0, label:"Sun", name:"Sunday",
+    desc:"💪 Gym day · 🎉 Holiday",
+    icon:"🎉", badge:"Holiday · Gym",
+    nodes:["w","g","bf","d2","H","h1","h2","h3","h4","dn","dv","wd","bd"],
+    edges:[["w","g"],["g","bf"],["bf","d2"],["d2","H"],["H","h1"],["h1","h2"],["h2","h3"],["h3","h4"],["h4","dn"],["dn","dv"],["dv","wd"],["wd","bd"]]
+  }
+};
+
+var world=document.getElementById("world"),svg=document.getElementById("svg"),view=document.getElementById("view");
+var listView=document.getElementById("listView"),tabsWrap=document.getElementById("tabsWrap");
+var el={},byId={},st={},edgePaths={},moved=false;
+var curDay="all",curMode="flow";
+
+var todayNum=new Date().getDay();
+var dayKeys=["sun","mon","tue","wed","thu","fri","sat"];
+var todayKey=dayKeys[todayNum];
+
+function todayStr(){var n=new Date();return n.getFullYear()+"-"+(n.getMonth()+1)+"-"+n.getDate()}
+try{st=JSON.parse(localStorage.getItem("routineflow:"+todayStr())||"{}")}catch(e){}
+function save(){try{localStorage.setItem("routineflow:"+todayStr(),JSON.stringify(st))}catch(e){}}
+
+// Build flowchart nodes
+N.forEach(function(n){
+  var d=document.createElement("div");
+  n.w=200;n.h=n.trk?50:62;byId[n.id]=n;
+  d.className="n "+n.c+(n.trk?" trk":"");
+  d.style.left=n.x+"px";d.style.top=n.y+"px";d.style.height=n.h+"px";
+  d.id="node-"+n.id;
+
+  var b=document.createElement("b");b.textContent=n.t;d.appendChild(b);
+  if(n.sub){var s=document.createElement("span");s.textContent=n.sub;d.appendChild(s)}
+  if(n.p){var g=document.createElement("i");g.textContent="Priority 1";d.appendChild(g)}
+  
+  d.onclick=function(){
+    if(moved)return;
+    toggleNode(n.id);
+  };
+  world.appendChild(d);el[n.id]=d;
+});
+
+// Build flowchart SVG edges
+E.forEach(function(e){
+  var a=byId[e[0]],b=byId[e[1]],x1=a.x+100,y1=a.y+a.h,x2=b.x+100,y2=b.y,dy=Math.max(30,Math.abs(y2-y1)/2);
+  var p=document.createElementNS("http://www.w3.org/2000/svg","path");
+  p.setAttribute("d","M"+x1+","+y1+" C"+x1+","+(y1+dy)+" "+x2+","+(y2-dy)+" "+x2+","+y2);
+  var edgeKey=e[0]+"->"+e[1];
+  p.id="edge-"+edgeKey;
+  svg.appendChild(p);
+  edgePaths[edgeKey]=p;
+});
+
+function toggleNode(id){
+  if(st[id])delete st[id];else st[id]=1;
+  save();
+  paint();
+  if(curMode==="list")renderList();
+}
+
+// Generate tabs
+var tabOrder=["all","mon","tue","wed","thu","fri","sat","sun"];
+tabOrder.forEach(function(k){
+  var cfg=DAY_CONFIG[k];
+  var btn=document.createElement("button");
+  btn.className="tab-btn"+(k===curDay?" active":"");
+  btn.id="tab-"+k;
+  btn.setAttribute("role","tab");
+  
+  var isToday = (k === todayKey);
+  var html = (cfg.icon ? cfg.icon + " " : "") + cfg.label;
+  if(isToday && k !== "all"){
+    html += ' <span class="t-dot" title="Today"></span>';
+  }
+  btn.innerHTML = html;
+  btn.onclick = function(){ selectDay(k); };
+  tabsWrap.appendChild(btn);
+});
+
+function selectDay(key){
+  curDay = key;
+  document.querySelectorAll(".tab-btn").forEach(function(b){
+    b.classList.toggle("active", b.id === "tab-" + key);
+  });
+  
+  var cfg = DAY_CONFIG[key];
+  document.getElementById("dayBadge").textContent = cfg.badge;
+  document.getElementById("dayDesc").textContent = cfg.desc;
+
+  applyFilter();
+  paint();
+  if(curMode === "list") renderList();
+}
+
+function applyFilter(){
+  var cfg = DAY_CONFIG[curDay];
+  var isAll = (curDay === "all");
+  var activeNodeSet = cfg.nodes ? new Set(cfg.nodes) : null;
+  var activeEdgeSet = cfg.edges ? new Set(cfg.edges.map(function(e){ return e[0]+"->"+e[1]; })) : null;
+
+  N.forEach(function(n){
+    var dom = el[n.id];
+    if(isAll){
+      dom.classList.remove("dimmed");
+      dom.classList.remove("node-focus");
+    } else {
+      var isActive = activeNodeSet.has(n.id);
+      dom.classList.toggle("dimmed", !isActive);
+      dom.classList.toggle("node-focus", isActive && n.trk);
+    }
+  });
+
+  E.forEach(function(e){
+    var k = e[0]+"->"+e[1];
+    var pathEl = edgePaths[k];
+    if(!pathEl) return;
+    if(isAll){
+      pathEl.className.baseVal = "";
+    } else {
+      var isActive = activeEdgeSet.has(k);
+      pathEl.className.baseVal = isActive ? "edge-active" : "edge-dimmed";
+    }
+  });
+}
+
+function paint(){
+  var cfg = DAY_CONFIG[curDay];
+  var targetList = cfg.nodes ? cfg.nodes : N.map(function(n){ return n.id; });
+  var doneCount = 0;
+
+  N.forEach(function(n){
+    var isDone = !!st[n.id];
+    el[n.id].classList.toggle("done", isDone);
+    if(isDone && targetList.indexOf(n.id) !== -1){
+      doneCount++;
+    }
+  });
+
+  var total = targetList.length;
+  var text = doneCount + " of " + total + " done";
+  document.getElementById("pg").textContent = text;
+}
+
+// Timeline List View Rendering
+function renderList(){
+  var cfg = DAY_CONFIG[curDay];
+  var isAll = (curDay === "all");
+  var nodesToShow = isAll ? N : cfg.nodes.map(function(id){ return byId[id]; });
+
+  document.getElementById("listTitle").textContent = cfg.name + " Schedule";
+  document.getElementById("listSubtitle").textContent = cfg.desc;
+
+  var container = document.getElementById("listItems");
+  container.innerHTML = "";
+
+  var doneCount = 0;
+  nodesToShow.forEach(function(n){
+    var isDone = !!st[n.id];
+    if(isDone) doneCount++;
+
+    var item = document.createElement("div");
+    item.className = "tl-item" + (isDone ? " done" : "");
+    item.onclick = function(){ toggleNode(n.id); };
+
+    var left = document.createElement("div");
+    left.className = "tl-left";
+
+    var titleRow = document.createElement("div");
+    titleRow.className = "tl-title-row";
+
+    var title = document.createElement("span");
+    title.className = "tl-title";
+    title.textContent = n.t;
+    titleRow.appendChild(title);
+
+    if(n.cat){
+      var tag = document.createElement("span");
+      tag.className = "tl-badge";
+      tag.textContent = n.cat;
+      titleRow.appendChild(tag);
+    }
+    if(n.p){
+      var pBadge = document.createElement("span");
+      pBadge.className = "tl-badge p1";
+      pBadge.textContent = "Priority 1";
+      titleRow.appendChild(pBadge);
+    }
+    left.appendChild(titleRow);
+
+    if(n.sub){
+      var sub = document.createElement("div");
+      sub.className = "tl-sub";
+      sub.textContent = n.sub;
+      left.appendChild(sub);
+    }
+
+    var check = document.createElement("div");
+    check.className = "tl-check";
+    check.textContent = "✓";
+
+    item.appendChild(left);
+    item.appendChild(check);
+    container.appendChild(item);
+  });
+
+  var total = nodesToShow.length;
+  var pct = total ? Math.round((doneCount / total) * 100) : 0;
+  document.getElementById("listProgressText").textContent = doneCount + " of " + total + " completed (" + pct + "%)";
+  document.getElementById("listProgressBar").style.width = pct + "%";
+}
+
+// View switcher
+document.getElementById("viewFlow").onclick = function(){
+  curMode = "flow";
+  document.getElementById("viewFlow").classList.add("active");
+  document.getElementById("viewList").classList.remove("active");
+  view.style.display = "block";
+  listView.style.display = "none";
+};
+document.getElementById("viewList").onclick = function(){
+  curMode = "list";
+  document.getElementById("viewList").classList.add("active");
+  document.getElementById("viewFlow").classList.remove("active");
+  view.style.display = "none";
+  listView.style.display = "flex";
+  renderList();
+};
+
+// Flowchart pan & zoom
+var sc=1,tx=0,ty=0;
+function apply(){world.style.transform="translate("+tx+"px,"+ty+"px) scale("+sc+")"}
+function fit(){var w=innerWidth;sc=Math.min(w/780,1);tx=(w-760*sc)/2;ty=80;apply()}
+function zoomAt(f,cx,cy){var ns=Math.max(.3,Math.min(2,sc*f));tx=cx-(cx-tx)*(ns/sc);ty=cy-(cy-ty)*(ns/sc);sc=ns;apply()}
+view.addEventListener("wheel",function(e){e.preventDefault();if(e.ctrlKey||e.metaKey)zoomAt(e.deltaY<0?1.1:.9,e.clientX,e.clientY);else{tx-=e.deltaX;ty-=e.deltaY;apply()}},{passive:false});
+var drag=null;
+view.addEventListener("pointerdown",function(e){drag={x:e.clientX,y:e.clientY,tx:tx,ty:ty};moved=false});
+addEventListener("pointermove",function(e){if(!drag)return;var dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>4){moved=true;view.classList.add("drag")}tx=drag.tx+dx;ty=drag.ty+dy;apply()});
+addEventListener("pointerup",function(){drag=null;view.classList.remove("drag");setTimeout(function(){moved=false},0)});
+document.getElementById("zi").onclick=function(){zoomAt(1.2,innerWidth/2,innerHeight/2)};
+document.getElementById("zo").onclick=function(){zoomAt(1/1.2,innerWidth/2,innerHeight/2)};
+document.getElementById("fit").onclick=fit;
+addEventListener("resize",fit);
+
+// Initialize with today's tab
+selectDay(todayKey);
+fit();
+</script>
+</body>
+</html>
